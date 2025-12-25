@@ -8,15 +8,20 @@ RUN curl -Lo koreader.tar.xz "$KOREADER_URL" \
 FROM ghcr.io/linuxserver/baseimage-selkies:arm64v8-ubuntunoble
 ENV HARDEN_DESKTOP=True \
     HARDEN_OPENBOX=True \
+    NO_DECOR=True \
     NO_GAMEPAD=True \
-    SELKIES_FILE_TRANSFERS=upload,download \
-    SELKIES_GAMEPAD_ENABLED=False \
-    SELKIES_UI_SIDEBAR_SHOW_FILES=True \
-    SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=False \
-    SELKIES_UI_SIDEBAR_SHOW_SHARING=False \
-    SELKIES_MICROPHONE_ENABLED=False \
     START_DOCKER=False \
-    TITLE="Koreader"
+    TITLE="KOReader" \
+    # Hide all Selkies UI
+    SELKIES_UI_SHOW_SIDEBAR=False \
+    SELKIES_UI_SHOW_LOGO=False \
+    SELKIES_UI_SHOW_CORE_BUTTONS=False \
+    SELKIES_UI_SIDEBAR_SHOW_KEYBOARD_BUTTON=False \
+    SELKIES_FILE_TRANSFERS=none \
+    SELKIES_CLIPBOARD_ENABLED=False \
+    SELKIES_GAMEPAD_ENABLED=False \
+    SELKIES_MICROPHONE_ENABLED=False \
+    SELKIES_ENABLE_SHARING=False
 
 # Enable apt cache for faster rebuilds
 RUN rm -f /etc/apt/apt.conf.d/docker-clean && \

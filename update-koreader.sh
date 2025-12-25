@@ -5,6 +5,11 @@ set -e
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOCKERFILE="$REPO_DIR/Dockerfile"
 
+# Force sync with remote
+cd "$REPO_DIR"
+git fetch origin main
+git reset --hard origin/main
+
 # Fetch latest URL from n8n webhook
 LATEST_URL=$(curl -s "https://n8n.cusanity.synology.me/webhook/ko" | grep -oP '(?<="latestUrl":")[^"]+')
 

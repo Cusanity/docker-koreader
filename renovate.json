@@ -34,8 +34,5 @@
   ],
   "pinDigests": true,
   "platformAutomerge": true,
-  "pre-commit": {
-    "enabled": true
-  },
   "rebaseWhen": "auto"
 }

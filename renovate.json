@@ -11,10 +11,6 @@
   },
   "packageRules": [
     {
-      "ignoreTests": false,
-      "matchPackagePatterns": "koreader"
-    },
-    {
       "groupName": "docker-action",
       "matchPackagePatterns": [
         "docker"
@@ -41,17 +37,5 @@
   "pre-commit": {
     "enabled": true
   },
-  "rebaseWhen": "auto",
-  "regexManagers": [
-    {
-      "datasourceTemplate": "github-releases",
-      "depNameTemplate": "koreader/koreader",
-      "fileMatch": [
-        "Dockerfile"
-      ],
-      "matchStrings": [
-        "ARG KOREADER_VERSION=(?<currentValue>.*?)\n"
-      ]
-    }
-  ]
+  "rebaseWhen": "auto"
 }

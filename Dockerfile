@@ -1,8 +1,7 @@
 # Stage 1: Download KOReader
 FROM docker.io/curlimages/curl:8.17.0 AS curl
-ARG KOREADER_VERSION=v2025.10
-RUN curl -Lo koreader.tar.xz \
-    https://github.com/koreader/koreader/releases/download/${KOREADER_VERSION}/koreader-linux-aarch64-${KOREADER_VERSION}.tar.xz \
+ARG KOREADER_URL=https://github.com/koreader/koreader/releases/download/v2025.10/koreader-linux-aarch64-v2025.10.tar.xz
+RUN curl -Lo koreader.tar.xz "$KOREADER_URL" \
     && tar -xf koreader.tar.xz
 
 # Stage 2: Final image (Ubuntu Noble ARM64 for Raspberry Pi 4)

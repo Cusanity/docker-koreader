@@ -1,46 +1,69 @@
-# Description
+# Docker KOReader (ARM64)
+
+> **Fork of [zephyros-dev/docker-koreader](https://github.com/zephyros-dev/docker-koreader)**
 
 [![Build](https://github.com/cusanity/docker-koreader/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/cusanity/docker-koreader/actions/workflows/build.yaml)
 [![Latest](https://ghcr-badge.egpl.dev/cusanity/koreader/latest_tag?color=%2344cc11&ignore=latest&label=Latest&trim=)](https://github.com/cusanity/docker-koreader/pkgs/container/koreader)
-[![Tags](https://ghcr-badge.egpl.dev/cusanity/koreader/tags?color=%2344cc11&ignore=latest&n=3&label=Tags&trim=)](https://github.com/cusanity/docker-koreader/pkgs/container/koreader)
 
-Koreader installed in a docker container, accessible via browser.
+KOReader in a Docker container, accessible via browser. Tested on **Raspberry Pi 4**.
 
-## Tags
+## Why This Fork?
 
-The image name is `ghcr.io/cusanity/koreader`. The following tags are supported:
+This fork is tailored for ARM64 (Raspberry Pi 4) with the following changes:
 
-- `latest`: Latest version built on the main branch
-- `Koreader.version`: Specific version of Koreader. e.g: `v2023.06.1`
-- `Koreader.version-distro`: Version of Koreader along with distro:
+| Feature | Original | This Fork |
+|---------|----------|-----------|
+| **Architecture** | amd64 + arm64 | arm64 only |
+| **Base Image** | Debian + Fedora options | Ubuntu Noble ARM64 only |
+| **KOReader Updates** | Renovate (GitHub releases) | Custom script (OTA nightly builds) |
+| **Autostart** | Sometimes broken | Force-enabled on every boot |
 
-  - Debian example: `v2025.04-debian`
-  - Fedora example: `v2025.04-fedora`
+### Key Changes
+
+- **Simplified Dockerfile** - Single ARM64 stage, no multi-arch complexity
+- **Custom update script** (`update-koreader.sh`) - Fetches latest KOReader from OTA server
+- **Fixed autostart** - KOReader always launches on container start
+- **Removed** - Fedora support, pre-commit hooks, test workflow
 
 ## Installation
 
-1. Create a `docker-compose.yaml`. Checkout the [docker-compose.yaml](docker-compose.yaml) for example.
+1. Create a `docker-compose.yaml`:
 
-2. Run the following command to start the container
+   ```yaml
+   services:
+     koreader:
+       image: ghcr.io/cusanity/koreader:latest
+       ports:
+         - "3000:3000"
+       volumes:
+         - ./config:/config
+   ```
+
+2. Start the container:
 
    ```bash
    docker-compose up -d
    ```
 
-3. Open your browser and go to `http://localhost:3000`
+3. Open `http://localhost:3000` in your browser.
 
-## Configurations
+## Building Locally
 
-- The image is based on [linuxserver/baseimage-selkies](https://github.com/linuxserver/docker-baseimage-selkies). See the base image for more configurations options.
-- The koreader configurations can be found in `/config/.config/koreader` inside the container.
-- For user with Fedora native distro and Nvidia GPU, you will need to use the fedora image tag for the NVENC to work.
+```bash
+docker buildx build --platform linux/arm64 -t koreader:local --load .
+```
 
-### Renovate autoupdate
+## Configuration
 
-- For [renovate user](https://github.com/renovatebot/renovate), add this to the renovate configuration for the tags auto-update:
+- Based on [linuxserver/baseimage-selkies](https://github.com/linuxserver/docker-baseimage-selkies)
+- KOReader config: `/config/.config/koreader` inside the container
 
-  ```json
-  {
-    "extends": ["github>cusanity/docker-koreader"],
-  }
-  ```
+## Updating KOReader
+
+Run the update script (requires git credentials configured):
+
+```bash
+./update-koreader.sh
+```
+
+This fetches the latest OTA build, updates the Dockerfile, and pushes to trigger a new image build.

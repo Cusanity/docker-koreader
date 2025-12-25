@@ -1,14 +1,14 @@
 # Description
 
-[![Build](https://github.com/zephyros-dev/docker-koreader/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/zephyros-dev/docker-koreader/actions/workflows/build.yaml)
-[![Latest](https://ghcr-badge.egpl.dev/zephyros-dev/koreader/latest_tag?color=%2344cc11&ignore=latest&label=Latest&trim=)](https://github.com/zephyros-dev/docker-koreader/pkgs/container/koreader)
-[![Tags](https://ghcr-badge.egpl.dev/zephyros-dev/koreader/tags?color=%2344cc11&ignore=latest&n=3&label=Tags&trim=)](https://github.com/zephyros-dev/docker-koreader/pkgs/container/koreader)
+[![Build](https://github.com/cusanity/docker-koreader/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/cusanity/docker-koreader/actions/workflows/build.yaml)
+[![Latest](https://ghcr-badge.egpl.dev/cusanity/koreader/latest_tag?color=%2344cc11&ignore=latest&label=Latest&trim=)](https://github.com/cusanity/docker-koreader/pkgs/container/koreader)
+[![Tags](https://ghcr-badge.egpl.dev/cusanity/koreader/tags?color=%2344cc11&ignore=latest&n=3&label=Tags&trim=)](https://github.com/cusanity/docker-koreader/pkgs/container/koreader)
 
 Koreader installed in a docker container, accessible via browser.
 
 ## Tags
 
-The image name is `ghcr.io/zephyros-dev/koreader`. The following tags are supported:
+The image name is `ghcr.io/cusanity/koreader`. The following tags are supported:
 
 - `latest`: Latest version built on the main branch
 - `Koreader.version`: Specific version of Koreader. e.g: `v2023.06.1`
@@ -41,6 +41,6 @@ The image name is `ghcr.io/zephyros-dev/koreader`. The following tags are suppor
 
   ```json
   {
-    "extends": ["github>zephyros-dev/docker-koreader"],
+    "extends": ["github>cusanity/docker-koreader"],
   }
   ```

@@ -2,7 +2,9 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "automerge": true,
   "automergeType": "branch",
-  "extends": ["github>zephyros-dev/docker-koreader"],
+  "extends": [
+    "github>cusanity/docker-koreader"
+  ],
   "ignoreTests": true,
   "lockFileMaintenance": {
     "enabled": true
@@ -14,11 +16,24 @@
     },
     {
       "groupName": "docker-action",
-      "matchPackagePatterns": ["docker"]
+      "matchPackagePatterns": [
+        "docker"
+      ]
     },
     {
-      "matchPackagePatterns": ["renovate"],
-      "schedule": ["* 16 * * 0"]
+      "matchPackagePatterns": [
+        "renovate"
+      ],
+      "schedule": [
+        "* 16 * * 0"
+      ]
+    },
+    {
+      "description": "Only allow arm64 variants for base images",
+      "matchPackagePatterns": [
+        "baseimage-selkies"
+      ],
+      "allowedVersions": "/arm64/"
     }
   ],
   "pinDigests": true,
@@ -31,8 +46,12 @@
     {
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "koreader/koreader",
-      "fileMatch": ["Dockerfile"],
-      "matchStrings": ["ARG KOREADER_VERSION=(?<currentValue>.*?)\n"]
+      "fileMatch": [
+        "Dockerfile"
+      ],
+      "matchStrings": [
+        "ARG KOREADER_VERSION=(?<currentValue>.*?)\n"
+      ]
     }
   ]
 }

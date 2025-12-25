@@ -1,19 +1,16 @@
-FROM docker.io/curlimages/curl:8.17.0@sha256:935d9100e9ba842cdb060de42472c7ca90cfe9a7c96e4dacb55e79e560b3ff40 AS curl
-ARG ARCH='uname -m'
+# Stage 1: Download KOReader
+FROM docker.io/curlimages/curl:8.17.0 AS curl
 ARG KOREADER_VERSION=v2025.10
-RUN \
-    export ARCH=$(eval ${ARCH}) \
-    && curl -Lo koreader.tar.xz \
-    https://github.com/koreader/koreader/releases/download/${KOREADER_VERSION}/koreader-linux-${ARCH}-${KOREADER_VERSION}.tar.xz \
+RUN curl -Lo koreader.tar.xz \
+    https://github.com/koreader/koreader/releases/download/${KOREADER_VERSION}/koreader-linux-aarch64-${KOREADER_VERSION}.tar.xz \
     && tar -xf koreader.tar.xz
 
-FROM ghcr.io/linuxserver/baseimage-selkies:fedora42@sha256:ad246110cd3917c26b1a5b77f4307218b172a78de9c01af1d5faa8a8f8966c6d AS fedora
-ENV \
-    HARDEN_DESKTOP=True \
+# Stage 2: Final image (Ubuntu Noble ARM64 for Raspberry Pi 4)
+FROM ghcr.io/linuxserver/baseimage-selkies:arm64v8-ubuntunoble
+ENV HARDEN_DESKTOP=True \
     HARDEN_OPENBOX=True \
     NO_GAMEPAD=True \
     SELKIES_FILE_TRANSFERS=upload,download \
-    SELKIES_GAMEPAD_ENABLED=False \
     SELKIES_GAMEPAD_ENABLED=False \
     SELKIES_UI_SIDEBAR_SHOW_FILES=True \
     SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=False \
@@ -21,46 +18,25 @@ ENV \
     SELKIES_MICROPHONE_ENABLED=False \
     START_DOCKER=False \
     TITLE="Koreader"
-RUN --mount=type=cache,target=/var/cache/libdnf5,sharing=locked \
-    dnf install -y \
-    iputils \
-    # https://github.com/linuxserver/docker-baseimage-selkies/issues/100#issuecomment-3367806288
-    && echo -e "\ntrue" >> /etc/s6-overlay/s6-rc.d/init-selkies-config/run \
-    && sed -i 's|</applications>|  <application class="*">\n <fullscreen>yes</fullscreen>\n </application>\n</applications>|' /etc/xdg/openbox/rc.xml \
-    && echo koreader > /defaults/autostart
-COPY --from=curl /home/curl_user/bin/koreader /usr/bin/koreader
-COPY --from=curl /home/curl_user/lib/koreader /usr/lib/koreader
-COPY --from=curl /home/curl_user/share/pixmaps/koreader.png /usr/share/selkies/www/icon.png
-EXPOSE 3000
 
-FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie@sha256:512342602f61aeb3f3fa28d3aac0d49a33206d1647fb3a17e7ab331a8f4be60d AS debian
-ENV \
-    HARDEN_DESKTOP=True \
-    HARDEN_OPENBOX=True \
-    NO_GAMEPAD=True \
-    SELKIES_FILE_TRANSFERS=upload,download \
-    SELKIES_GAMEPAD_ENABLED=False \
-    SELKIES_GAMEPAD_ENABLED=False \
-    SELKIES_UI_SIDEBAR_SHOW_FILES=True \
-    SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=False \
-    SELKIES_UI_SIDEBAR_SHOW_SHARING=False \
-    SELKIES_MICROPHONE_ENABLED=False \
-    START_DOCKER=False \
-    TITLE="Koreader"
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+# Enable apt cache for faster rebuilds
+RUN rm -f /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+# Install dependencies and configure KOReader autostart
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt update \
-    && apt install -y \
-    # For network connectivity
-    iputils-ping \
-    libsdl2-2.0-0 \
-    # https://github.com/linuxserver/docker-baseimage-selkies/issues/100#issuecomment-3367806288
+    apt update && apt install -y iputils-ping libsdl2-2.0-0 \
+    # Fix selkies init issue (https://github.com/linuxserver/docker-baseimage-selkies/issues/100)
     && echo "\ntrue" >> /etc/s6-overlay/s6-rc.d/init-selkies-config/run \
-    # Set application to fullscreen
+    # Set fullscreen mode
     && sed -i 's|</applications>|  <application class="*">\n <fullscreen>yes</fullscreen>\n </application>\n</applications>|' /etc/xdg/openbox/rc.xml \
+    # Force KOReader autostart (overwrite existing config)
+    && sed -i 's|if \[\[ ! -f "$CONF_DIR/autostart" \]\]; then|if true; then|' /etc/s6-overlay/s6-rc.d/init-selkies-config/run \
     && echo koreader > /defaults/autostart
+
 COPY --from=curl /home/curl_user/bin/koreader /usr/bin/koreader
 COPY --from=curl /home/curl_user/lib/koreader /usr/lib/koreader
 COPY --from=curl /home/curl_user/share/pixmaps/koreader.png /usr/share/selkies/www/icon.png
+
 EXPOSE 3000

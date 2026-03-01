@@ -1,6 +1,6 @@
 # Stage 1: Download KOReader
 FROM docker.io/curlimages/curl:8.17.0 AS curl
-ARG KOREADER_URL=https://ota.koreader.rocks/koreader-linux-aarch64-v2025.10-153-g0ffe37f8b_2026-02-27.tar.xz
+ARG KOREADER_URL=https://ota.koreader.rocks/koreader-linux-aarch64-v2025.10-156-g7fdba6a99_2026-03-01.tar.xz
 RUN curl -Lo koreader.tar.xz "$KOREADER_URL" \
     && tar -xf koreader.tar.xz
 

@@ -30,7 +30,7 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean && \
 # Install dependencies and configure KOReader autostart
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt update && apt install -y iputils-ping libsdl2-2.0-0 \
+    apt update && apt install -y iputils-ping \
     # Fix selkies init issue (https://github.com/linuxserver/docker-baseimage-selkies/issues/100)
     && echo "\ntrue" >> /etc/s6-overlay/s6-rc.d/init-selkies-config/run \
     # Set fullscreen mode
@@ -39,8 +39,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && sed -i 's|if \[\[ ! -f "$CONF_DIR/autostart" \]\]; then|if true; then|' /etc/s6-overlay/s6-rc.d/init-selkies-config/run \
     && echo koreader > /defaults/autostart
 
-COPY --from=curl /home/curl_user/bin/koreader /usr/bin/koreader
 COPY --from=curl /home/curl_user/lib/koreader /usr/lib/koreader
+RUN ln -s ../lib/koreader/koreader.sh /usr/bin/koreader
 COPY --from=curl /home/curl_user/share/icons/hicolor/512x512/apps/koreader.png /usr/share/selkies/www/icon.png
 
 EXPOSE 3000

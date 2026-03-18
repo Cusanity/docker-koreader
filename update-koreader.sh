@@ -12,7 +12,7 @@ git reset --hard origin/main
 
 BASE_URL="https://ota.koreader.rocks/"
 INDEX_URL="${BASE_URL}"
-PATTERN='^koreader-linux-aarch64-v[0-9]{4}\.[0-9]{2}-[0-9]+-g[0-9a-f]+_[0-9]{4}-[0-9]{2}-[0-9]{2}\.tar\.xz$'
+PATTERN='^koreader-linux-arm64-v[0-9]{4}\.[0-9]{2}(-[0-9]+-g[0-9a-f]+_[0-9]{4}-[0-9]{2}-[0-9]{2})?\.tar\.xz$'
 
 get_latest_url() {
   local html latest_path
@@ -24,13 +24,13 @@ get_latest_url() {
       | grep -oP 'href="[^"]+"' \
       | sed -E 's/^href="(.*)"$/\1/' \
       | grep -E "$PATTERN" \
-      | awk 'match($0, /_([0-9]{4}-[0-9]{2}-[0-9]{2})\.tar\.xz$/, m) { print m[1], $0 }' \
+      | awk 'match($0, /_([0-9]{4}-[0-9]{2}-[0-9]{2})\.tar\.xz$/, m) { print m[1], $0; next } match($0, /v([0-9]{4}\.[0-9]{2})\.tar\.xz$/) { print "9999-99-99", $0 }' \
       | sort -r \
       | awk 'NR==1{print $2}'
   )"
 
   if [[ -z "${latest_path:-}" ]]; then
-    echo "Error: No matching linux aarch64 tar.xz links found at $INDEX_URL" >&2
+    echo "Error: No matching linux arm64 tar.xz links found at $INDEX_URL" >&2
     exit 1
   fi
 
@@ -50,8 +50,8 @@ echo "Updating KOReader URL:"
 echo "  Old: ${CURRENT_URL:-<none>}"
 echo "  New: $LATEST_URL"
 
-# Extract version string (e.g., v2025.10-66-g6ee248d80)
-VERSION="$(echo "$LATEST_URL" | grep -oP 'v[0-9]+\.[0-9]+-[0-9]+-g[0-9a-f]+')"
+# Extract version string (e.g., v2026.03 or v2026.03-1-gbb04cb8a1)
+VERSION="$(echo "$LATEST_URL" | grep -oP 'v[0-9]+\.[0-9]+(-[0-9]+-g[0-9a-f]+)?')"
 
 sed -i "s|^ARG KOREADER_URL=.*$|ARG KOREADER_URL=$LATEST_URL|" "$DOCKERFILE"
 

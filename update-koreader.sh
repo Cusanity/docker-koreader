@@ -11,26 +11,21 @@ git fetch origin main
 git reset --hard origin/main
 
 BASE_URL="https://ota.koreader.rocks/"
-INDEX_URL="${BASE_URL}"
-PATTERN='^koreader-linux-arm64-v[0-9]{4}\.[0-9]{2}(-[0-9]+-g[0-9a-f]+_[0-9]{4}-[0-9]{2}-[0-9]{2})?\.tar\.xz$'
+LATEST_NIGHTLY_URL="${BASE_URL}koreader-linux-arm64-latest-nightly"
+PATTERN='^koreader-linux-arm64-v[0-9]{4}\.[0-9]{2}-[0-9]+-g[0-9a-f]+_[0-9]{4}-[0-9]{2}-[0-9]{2}\.tar\.xz$'
 
 get_latest_url() {
-  local html latest_path
+  local latest_path
 
-  html="$(curl -fsSL "$INDEX_URL")"
-
-  latest_path="$(
-    printf '%s' "$html" \
-      | grep -oP 'href="[^"]+"' \
-      | sed -E 's/^href="(.*)"$/\1/' \
-      | grep -E "$PATTERN" \
-      | awk 'match($0, /_([0-9]{4}-[0-9]{2}-[0-9]{2})\.tar\.xz$/, m) { print m[1], $0; next } match($0, /v([0-9]{4}\.[0-9]{2})\.tar\.xz$/) { print "9999-99-99", $0 }' \
-      | sort -r \
-      | awk 'NR==1{print $2}'
-  )"
+  latest_path="$(curl -fsSL "$LATEST_NIGHTLY_URL" | tr -d '\r\n')"
 
   if [[ -z "${latest_path:-}" ]]; then
-    echo "Error: No matching linux arm64 tar.xz links found at $INDEX_URL" >&2
+    echo "Error: No nightly filename returned from $LATEST_NIGHTLY_URL" >&2
+    exit 1
+  fi
+
+  if [[ ! "$latest_path" =~ $PATTERN ]]; then
+    echo "Error: Unexpected nightly filename from $LATEST_NIGHTLY_URL: $latest_path" >&2
     exit 1
   fi
 
@@ -50,7 +45,7 @@ echo "Updating KOReader URL:"
 echo "  Old: ${CURRENT_URL:-<none>}"
 echo "  New: $LATEST_URL"
 
-# Extract version string (e.g., v2026.03 or v2026.03-1-gbb04cb8a1)
+# Extract version string (e.g., v2026.03-1-gbb04cb8a1)
 VERSION="$(echo "$LATEST_URL" | grep -oP 'v[0-9]+\.[0-9]+(-[0-9]+-g[0-9a-f]+)?')"
 
 sed -i "s|^ARG KOREADER_URL=.*$|ARG KOREADER_URL=$LATEST_URL|" "$DOCKERFILE"

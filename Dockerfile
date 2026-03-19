@@ -41,6 +41,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 COPY --from=curl /home/curl_user/lib/koreader /usr/lib/koreader
 RUN ln -s ../lib/koreader/koreader.sh /usr/bin/koreader
-COPY --from=curl /home/curl_user/share/icons/hicolor/512x512/apps/koreader.png /usr/share/selkies/www/icon.png
+COPY --from=curl /home/curl_user/share/icons/hicolor/512x512/apps/rocks.koreader.KOReader.png /usr/share/selkies/www/icon.png
 
 EXPOSE 3000

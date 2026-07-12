@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      actions: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,10 +42,16 @@ jobs:
             type=raw,value=latest,enable={{ is_default_branch }}
             type=raw,value=${{ steps.koreader_version.outputs.version }}
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: Wandalen/wretry.action@v3
         with:
-          context: .
-          push: true
-          platforms: linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          action: docker/build-push-action@v6
+          with: |
+            context: .
+            push: true
+            platforms: linux/arm64
+            tags: ${{ steps.meta.outputs.tags }}
+            labels: ${{ steps.meta.outputs.labels }}
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
+          attempt_limit: 3
+          attempt_delay: 30000
